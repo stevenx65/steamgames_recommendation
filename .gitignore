@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+
+# Virtual env
+venv/
+.env/
+env/
+ENV/
+
+# Logs & caches
+*.log
+*.jsonl
+*.cache
+*.sqlite3
+py_ds_reco.store_cache.json
+py_ds_reco.steamdb_cache.json
+deepseek_messages.jsonl
+deepseek_error.log
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Backup folder
+/backup/
