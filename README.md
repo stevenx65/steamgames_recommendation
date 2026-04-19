@@ -1,60 +1,200 @@
-# steamgames_recommendation
+# Steam Games Recommendation
 
-## 简介（中文）
-`steamgames_recommendation` 是一款基于用户 Steam 游玩数据的个性化游戏推荐工具。它并发抓取 Steam 与 SteamDB 元数据，统计用户“游玩时长 Top10”偏好（genre、category、多人/单人倾向、平均游玩时长），并将这些结构化概要与可选的“最近发布/更新”候选传入 DeepSeek 聊天模型，最终生成 5 条差异化且可直接用于购买的推荐。注重隐私与可复现性：模型输入会保存为 `deepseek_messages.jsonl`（不包含授权信息），并支持本地缓存与并发/重试策略以提高稳定性。
-
-## Overview (English)
-`steamgames_recommendation` is a personalized Steam game recommender that analyzes a user’s play history to produce high-quality suggestions. It concurrently fetches metadata from Steam and SteamDB, summarizes player preferences from the top-10 played titles, and supplies that structured context — plus optional recent-release candidates — to a DeepSeek chat model to generate 5 differentiated recommendations. Model inputs are logged to `deepseek_messages.jsonl` for debugging (no authorization saved).
-
-## Features
-- Analyze user play history (Top10 by playtime) and extract preference signals.
-- Fetch game metadata from Steam store and SteamDB (genres, categories, release date, current players, score).
-- Optional recent release / update candidate scraping.
-- Prompt-engineered DeepSeek integration to produce structured 5-item recommendations.
-- Local caching, retry/backoff, concurrency control, and debug logging.
-
-## Requirements
-- Python 3.10+
-- Dependencies: `requests`, `python-dotenv`
-
-Install dependencies:
-```powershell
-pip install requests python-dotenv
-```
-
-## Environment variables
-- `DEEPSEEK_API_KEY` (required) — your DeepSeek API key. Prefer storing in `DEEPSEEK_API_KEY.env` at project root or set in environment.
-- `DEBUG_DEEPSEEK_MESSAGES` (optional) — set to `1` to print and save model `messages` to `deepseek_messages.jsonl`.
-- `INCLUDE_RECENT_RELEASES` (optional) — set to `1` to enable scraping recent-release candidates.
-- `RECENT_RELEASES_DAYS` (optional) — days range for "recent" (default 180).
-- `MAX_CONCURRENT_REQUESTS`, `TOP_N_STORE_DETAILS`, `MAX_RECOMMENDATION_TIME` — tuning parameters (see `OPERATION.md`).
-
-Note: The script requires you to provide a Steam Web API Key at runtime (input). For security, do not commit API keys to version control.
-
-## Quick start (PowerShell)
-```powershell
-#$env:STEAM_API_KEY='your_steam_api_key'   # optional env-read feature TODO
-#$env:DEEPSEEK_API_KEY='your_deepseek_key'
-#$env:DEBUG_DEEPSEEK_MESSAGES='1'   # optional
-python .\py_ds_reco.py
-
-# When prompted, enter:
-# ID：<your 17-digit SteamID>，Key：<your Steam Web API Key>
-```
-
-## Output & logs
-- `deepseek_messages.jsonl` — each line is a JSON record of the `messages` sent to DeepSeek (no Authorization header).
-- `deepseek_error.log` — saved DeepSeek API error responses (no Authorization).
-- `*.steamdb_cache.json`, `*.store_cache.json` — local caches for fetched metadata.
-
-## Key files
-- `py_ds_reco.py` — main script / entry point
-- `OPERATION.md` — operation guide and environment variable explanations
-- `RESUME_STEAM_RECO.md` — short project description for resume
-
-## Notes & Next steps
-- The scraping logic for recent releases relies on Steam store endpoints and HTML fragments; it may break if the store changes. If you plan public deployment, consider using official/contracted data sources or throttled proxy solutions.
-- Consider adding automated tests (unit tests + mocked HTTP responses) and CI before publishing the repo publicly.
+基于 Steam 游戏数据的个性化游戏推荐工具 / Personalized Steam game recommendation tool based on your gameplay data.
 
 ---
 
+## 功能特性 | Features
+
+- 分析 Steam 游戏库（游玩时长 Top 10）分析用户偏好
+- 并发获取 Steam 商店与 SteamDB 元数据
+- 调用 DeepSeek AI 模型生成 5 条差异化推荐
+- 本地缓存减少重复请求
+- 支持并发限速与超时保护
+
+- Analyze Steam library (Top 10 by playtime) to extract user preferences
+- Concurrently fetch metadata from Steam Store and SteamDB
+- Generate 5 differentiated recommendations via DeepSeek AI
+- Local caching to reduce API calls
+- Concurrency limiting and timeout protection
+
+---
+
+## 目录结构 | Structure
+
+```
+.
+├── config/           # 配置模块 / Configuration
+├── core/             # 核心业务逻辑 / Core business logic
+│   ├── analyzer.py   # 用户偏好分析 / User preference analysis
+│   └── recommender.py # 推荐主流程 / Main recommendation flow
+├── services/         # 外部 API 服务 / External API services
+│   ├── steam_api.py    # Steam API
+│   ├── steam_store.py  # Steam Store
+│   ├── steamdb.py      # SteamDB
+│   └── deepseek.py     # DeepSeek AI
+├── utils/            # 工具函数 / Utilities
+│   ├── cache.py      # JSON 缓存 / JSON caching
+│   └── http.py       # HTTP 会话管理 / HTTP session
+├── main.py           # CLI 入口 / CLI entry point
+├── requirements.txt  # 依赖 / Dependencies
+└── .env.example      # 环境变量示例 / Environment variables example
+```
+
+---
+
+## 安装 | Installation
+
+```bash
+# 克隆仓库 / Clone repo
+git clone https://github.com/stevenx65/steamgames_recommendation.git
+cd steamgames_recommendation
+
+# 创建虚拟环境（推荐）/ Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# 或 venv\Scripts\activate  # Windows
+
+# 安装依赖 / Install dependencies
+pip install -r requirements.txt
+```
+
+---
+
+## 配置 | Configuration
+
+复制示例环境文件并填入你的 API Key：
+
+```bash
+cp .env.example .env
+# 编辑 .env 填入 DEEPSEEK_API_KEY
+```
+
+| 变量 | 说明 | 必需 |
+|------|------|------|
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | 是 |
+| `MAX_CONCURRENT_REQUESTS` | 最大并发请求数 | 否（默认 6）|
+| `MAX_RECOMMENDATION_TIME` | 推荐超时时间（秒）| 否（默认 120）|
+| `DEBUG_DEEPSEEK_MESSAGES` | 调试模式 | 否（默认 0）|
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `DEEPSEEK_API_KEY` | DeepSeek API key | Yes |
+| `MAX_CONCURRENT_REQUESTS` | Max concurrent requests | No (default 6) |
+| `MAX_RECOMMENDATION_TIME` | Timeout in seconds | No (default 120) |
+| `DEBUG_DEEPSEEK_MESSAGES` | Debug mode | No (default 0) |
+
+---
+
+## 使用指南 | Usage
+
+### 基本用法 | Basic Usage
+
+```bash
+python main.py <STEAM_ID> <STEAM_API_KEY>
+```
+
+示例 | Example:
+```bash
+python main.py 76561198012345678 YOUR_STEAM_API_KEY
+```
+
+### 获取 Steam API Key
+
+访问 [Steam 开发者页面](https://steamcommunity.com/dev/apikey) 获取 API Key。
+
+Visit [Steam Developer Page](https://steamcommunity.com/dev/apikey) to get your API key.
+
+### 获取 Steam ID
+
+方法 1：通过 [SteamID.io](https://steamid.io/) 查询你的 Steam ID（17位数字）
+
+方法 2：在 Steam 客户端中查看个人资料 URL。
+
+Method 1: Use [SteamID.io](https://steamid.io/) to find your Steam ID (17 digits)
+
+Method 2: Check your profile URL in Steam client.
+
+---
+
+## 缓存 | Caching
+
+缓存文件存储在用户目录：
+
+```
+~/.steam_recommendation/cache/
+├── store.json      # Steam Store 缓存
+└── steamdb.json    # SteamDB 缓存
+```
+
+Caches are stored in user home directory to avoid committing to git.
+
+---
+
+## 输出示例 | Sample Output
+
+```
+🔍 正在获取你的游戏库...
+✅ 已获取 152 款游戏，正在分析 Top 10...
+
+🧭 用户游戏风格摘要：
+{
+  "top_genres": ["RPG", "Open World", "Action"],
+  "top_categories": ["Single-player", "Steam Achievements"],
+  "avg_playtime_minutes": 2847,
+  "multiplayer_pref": false,
+  "sample_games": ["Elden Ring", "The Witcher 3", "Baldur's Gate 3"]
+}
+
+🤖 正在生成推荐...
+
+1. 《Hades II》
+   - 类型：Roguelike, Action | 评分：9.2
+   - 匹配点：基于你对《Elden Ring》的高游玩时长，推荐这款高难度动作游戏
+   - 链接：https://store.steampowered.com/app/1145350/
+...
+```
+
+---
+
+## 安全提示 | Security Notes
+
+- **不要将 `.env` 文件提交到 Git**，已包含在 `.gitignore` 中
+- Steam API Key 和 DeepSeek API Key 仅保存在本地
+- 推荐声音日志 `deepseek_messages.jsonl` 不包含 Authorization
+
+- **Never commit `.env` to Git**, it's already in `.gitignore`
+- API keys are stored locally only
+- Debug logs exclude sensitive headers
+
+---
+
+## 故障排查 | Troubleshooting
+
+| 问题 | 解决 |
+|------|------|
+| 获取游戏库失败 | 检查 Steam ID 和 API Key 是否正确 |
+| DeepSeek 401 错误 | 检查 DEEPSEEK_API_KEY 是否设置 |
+| 请求超时 | 降低 MAX_CONCURRENT_REQUESTS 或增加 MAX_RECOMMENDATION_TIME |
+| 缓存不更新 | 删除 `~/.steam_recommendation/cache/` 目录 |
+
+| Issue | Solution |
+|-------|----------|
+| Failed to get library | Check Steam ID and API Key |
+| DeepSeek 401 | Verify DEEPSEEK_API_KEY is set |
+| Request timeout | Reduce MAX_CONCURRENT_REQUESTS or increase timeout |
+| Stale cache | Delete `~/.steam_recommendation/cache/` |
+
+---
+
+## 依赖 | Dependencies
+
+- Python 3.10+
+- `requests` - HTTP 请求
+- `python-dotenv` - 环境变量管理
+
+---
+
+## License
+
+MIT
