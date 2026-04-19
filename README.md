@@ -157,18 +157,6 @@ Caches are stored in user home directory to avoid committing to git.
 
 ---
 
-## 安全提示 | Security Notes
-
-- **不要将 `.env` 文件提交到 Git**，已包含在 `.gitignore` 中
-- Steam API Key 和 DeepSeek API Key 仅保存在本地
-- 推荐声音日志 `deepseek_messages.jsonl` 不包含 Authorization
-
-- **Never commit `.env` to Git**, it's already in `.gitignore`
-- API keys are stored locally only
-- Debug logs exclude sensitive headers
-
----
-
 ## 故障排查 | Troubleshooting
 
 | 问题 | 解决 |
