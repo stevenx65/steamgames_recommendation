@@ -6,7 +6,7 @@
 
 ---
 
-## 功能特性 | Features
+## 功能特性
 
 - 分析 Steam 游戏库（游玩时长 Top 10）分析用户偏好
 - 并发获取 Steam 商店与 SteamDB 元数据
@@ -16,48 +16,48 @@
 
 ---
 
-## 目录结构 | Structure
+## 目录结构
 
 ```
 .
-├── config/           # 配置模块 / Configuration
-├── core/             # 核心业务逻辑 / Core business logic
-│   ├── analyzer.py   # 用户偏好分析 / User preference analysis
-│   └── recommender.py # 推荐主流程 / Main recommendation flow
-├── services/         # 外部 API 服务 / External API services
+├── config/           # 配置模块
+├── core/             # 核心业务逻辑
+│   ├── analyzer.py   # 用户偏好分析
+│   └── recommender.py # 推荐主流程
+├── services/         # 外部 API 服务
 │   ├── steam_api.py    # Steam API
 │   ├── steam_store.py  # Steam Store
 │   ├── steamdb.py      # SteamDB
 │   └── deepseek.py     # DeepSeek AI
-├── utils/            # 工具函数 / Utilities
-│   ├── cache.py      # JSON 缓存 / JSON caching
-│   └── http.py       # HTTP 会话管理 / HTTP session
-├── main.py           # CLI 入口 / CLI entry point
-├── requirements.txt  # 依赖 / Dependencies
-└── .env.example      # 环境变量示例 / Environment variables example
+├── utils/            # 工具函数
+│   ├── cache.py      # JSON 缓存
+│   └── http.py       # HTTP 会话管理
+├── main.py           # CLI 入口
+├── requirements.txt  # 依赖
+└── .env.example      # 环境变量示例
 ```
 
 ---
 
-## 安装 | Installation
+## 安装
 
 ```bash
-# 克隆仓库 / Clone repo
+# 克隆仓库
 git clone https://github.com/stevenx65/steamgames_recommendation.git
 cd steamgames_recommendation
 
-# 创建虚拟环境（推荐）/ Create virtual environment (recommended)
+# 创建虚拟环境（推荐）
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
 # 或 venv\Scripts\activate  # Windows
 
-# 安装依赖 / Install dependencies
+# 安装依赖
 pip install -r requirements.txt
 ```
 
 ---
 
-## 配置 | Configuration
+## 配置
 
 复制示例环境文件并填入你的 API Key：
 
@@ -75,9 +75,9 @@ cp .env.example .env
 
 ---
 
-## 使用指南 | Usage
+## 使用指南
 
-### 基本用法 | Basic Usage
+### 基本用法
 
 ```bash
 python main.py <STEAM_ID> <STEAM_API_KEY>
@@ -100,7 +100,7 @@ python main.py 76561198012345678 YOUR_STEAM_API_KEY
 
 ---
 
-## 缓存 | Caching
+## 缓存
 
 缓存文件存储在用户目录：
 
@@ -112,7 +112,7 @@ python main.py 76561198012345678 YOUR_STEAM_API_KEY
 
 ---
 
-## 输出示例 | Sample Output
+## 输出示例
 
 ```
 🔍 正在获取你的游戏库...
@@ -138,7 +138,7 @@ python main.py 76561198012345678 YOUR_STEAM_API_KEY
 
 ---
 
-## 故障排查 | Troubleshooting
+## 故障排查
 
 | 问题 | 解决 |
 |------|------|
@@ -149,7 +149,7 @@ python main.py 76561198012345678 YOUR_STEAM_API_KEY
 
 ---
 
-## 依赖 | Dependencies
+## 依赖
 
 - Python 3.10+
 - `requests` - HTTP 请求
@@ -157,6 +157,6 @@ python main.py 76561198012345678 YOUR_STEAM_API_KEY
 
 ---
 
-## License
+## 许可协议
 
 MIT
