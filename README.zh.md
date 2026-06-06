@@ -1,18 +1,18 @@
-[中文版本](./README.zh.md)
+[English version](./README.md)
 
-# Steam Games Recommendation
+# Steam 游戏推荐工具
 
-Personalized Steam game recommendation tool based on your gameplay data.
+基于 Steam 游戏数据的个性化游戏推荐工具
 
 ---
 
 ## 功能特性 | Features
 
-- Analyze Steam library (Top 10 by playtime) to extract user preferences
-- Concurrently fetch metadata from Steam Store and SteamDB
-- Generate 5 differentiated recommendations via DeepSeek AI
-- Local caching to reduce API calls
-- Concurrency limiting and timeout protection
+- 分析 Steam 游戏库（游玩时长 Top 10）分析用户偏好
+- 并发获取 Steam 商店与 SteamDB 元数据
+- 调用 DeepSeek AI 模型生成 5 条差异化推荐
+- 本地缓存减少重复请求
+- 支持并发限速与超时保护
 
 ---
 
@@ -59,19 +59,19 @@ pip install -r requirements.txt
 
 ## 配置 | Configuration
 
-Copy the example environment file and fill in your API Key:
+复制示例环境文件并填入你的 API Key：
 
 ```bash
 cp .env.example .env
-# Edit .env and set DEEPSEEK_API_KEY
+# 编辑 .env 填入 DEEPSEEK_API_KEY
 ```
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DEEPSEEK_API_KEY` | DeepSeek API key | Yes |
-| `MAX_CONCURRENT_REQUESTS` | Max concurrent requests | No (default 6) |
-| `MAX_RECOMMENDATION_TIME` | Timeout in seconds | No (default 120) |
-| `DEBUG_DEEPSEEK_MESSAGES` | Debug mode | No (default 0) |
+| 变量 | 说明 | 必需 |
+|------|------|------|
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥 | 是 |
+| `MAX_CONCURRENT_REQUESTS` | 最大并发请求数 | 否（默认 6） |
+| `MAX_RECOMMENDATION_TIME` | 推荐超时时间（秒）| 否（默认 120） |
+| `DEBUG_DEEPSEEK_MESSAGES` | 调试模式 | 否（默认 0） |
 
 ---
 
@@ -83,32 +83,32 @@ cp .env.example .env
 python main.py <STEAM_ID> <STEAM_API_KEY>
 ```
 
-Example:
+示例：
 ```bash
 python main.py 76561198012345678 YOUR_STEAM_API_KEY
 ```
 
 ### 获取 Steam API Key
 
-Visit [Steam Developer Page](https://steamcommunity.com/dev/apikey) to get your API key.
+访问 [Steam 开发者页面](https://steamcommunity.com/dev/apikey) 获取 API Key。
 
 ### 获取 Steam ID
 
-Method 1: Use [SteamID.io](https://steamid.io/) to find your Steam ID (17 digits)
+方法 1：通过 [SteamID.io](https://steamid.io/) 查询你的 Steam ID（17位数字）
 
-Method 2: Check your profile URL in Steam client.
+方法 2：在 Steam 客户端中查看个人资料 URL。
 
 ---
 
 ## 缓存 | Caching
+
+缓存文件存储在用户目录：
 
 ```
 ~/.steam_recommendation/cache/
 ├── store.json      # Steam Store 缓存
 └── steamdb.json    # SteamDB 缓存
 ```
-
-Caches are stored in user home directory to avoid committing to git.
 
 ---
 
@@ -140,20 +140,20 @@ Caches are stored in user home directory to avoid committing to git.
 
 ## 故障排查 | Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Failed to get library | Check Steam ID and API Key |
-| DeepSeek 401 | Verify DEEPSEEK_API_KEY is set |
-| Request timeout | Reduce MAX_CONCURRENT_REQUESTS or increase timeout |
-| Stale cache | Delete `~/.steam_recommendation/cache/` |
+| 问题 | 解决 |
+|------|------|
+| 获取游戏库失败 | 检查 Steam ID 和 API Key 是否正确 |
+| DeepSeek 401 错误 | 检查 DEEPSEEK_API_KEY 是否设置 |
+| 请求超时 | 降低 MAX_CONCURRENT_REQUESTS 或增加 MAX_RECOMMENDATION_TIME |
+| 缓存不更新 | 删除 `~/.steam_recommendation/cache/` 目录 |
 
 ---
 
 ## 依赖 | Dependencies
 
 - Python 3.10+
-- `requests`
-- `python-dotenv`
+- `requests` - HTTP 请求
+- `python-dotenv` - 环境变量管理
 
 ---
 
